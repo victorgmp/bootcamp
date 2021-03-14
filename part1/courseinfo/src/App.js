@@ -1,71 +1,78 @@
-import React from 'react'
+/* eslint-disable react/jsx-one-expression-per-line */
+/* eslint-disable react/jsx-filename-extension */
+/* eslint-disable react/prop-types */
+/* eslint-disable arrow-body-style */
+import React from 'react';
 
 const Header = ({ course }) => {
   return (
-    <h1>{course}</h1>
-  )
-}
+    <h1>
+      {course}
+    </h1>
+  );
+};
+
+const Part = ({ exercises, part }) => {
+  return (
+    <p>
+      {part} {exercises}
+    </p>
+  );
+};
 
 const Content = ({
-  exercises1,
-  exercises2,
-  exercises3,
-  part1,
-  part2,
-  part3,
+  parts,
 }) => {
   return (
-    <>
-      <p>
-        {part1} {exercises1}
-      </p>
-      <p>
-        {part2} {exercises2}
-      </p>
-      <p>
-        {part3} {exercises3}
-      </p>
-    </>
-  )
-}
+    parts.map((part) => (
+      <Part
+        exercises={part.exercises}
+        part={part.name}
+      />
+    ))
+  );
+};
 
-const Total = ({
-  exercises1,
-  exercises2,
-  exercises3,
-}) => {
+const Total = ({ parts }) => {
+  // const total = parts.exercises.reduce((acc, curr) => acc + curr, 0);
+  let total = 0;
+  parts.forEach((part) => {
+    total += part.exercises;
+  });
+
   return (
-    <p>Number of exercises {exercises1 + exercises2 + exercises3}</p>
-  )
-}
+    <p>
+      Number of exercises {total}
+    </p>
+  );
+};
 
 const App = () => {
-  const course = 'Half Stack application development'
-  const exercises1 = 10
-  const exercises2 = 7
-  const exercises3 = 14
-  const part1 = 'Fundamentals of React'
-  const part2 = 'Using props to pass data'
-  const part3 = 'State of a component'
+  const course = {
+    name: 'Half Stack application development',
+    parts: [
+      {
+        name: 'Fundamentals of React',
+        exercises: 10,
+      },
+      {
+        name: 'Using props to pass data',
+        exercises: 7,
+      },
+      {
+        name: 'State of a component',
+        exercises: 14,
+      },
+    ],
+  };
 
   return (
     <div>
-      <Header course={course} />
-      <Content
-        exercises1={exercises1}
-        exercises2={exercises2}
-        exercises3={exercises3}
-        part1={part1}
-        part2={part2}
-        part3={part3}
-      />
-      <Total
-        exercises1={exercises1}
-        exercises2={exercises2}
-        exercises3={exercises3}
-      />
+      <Header course={course.name} />
+      <Content parts={course.parts} />
+      <Total parts={course.parts} />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
