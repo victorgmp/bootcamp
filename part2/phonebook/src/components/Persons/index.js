@@ -1,6 +1,6 @@
 import React from 'react'
 
-export const Persons = ({ persons, handleDelete }) => (
+const Persons = ({ persons, handleDelete }) => (
   <ul>
     {persons.map(person =>
       <li key={person.id}>
@@ -10,3 +10,5 @@ export const Persons = ({ persons, handleDelete }) => (
     )}
   </ul>
 )
+
+export default Persons

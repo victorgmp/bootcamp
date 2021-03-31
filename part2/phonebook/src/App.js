@@ -2,18 +2,21 @@ import React, { useState, useEffect } from 'react'
 
 import personService from './services/persons'
 
-import { Filter } from './components/Filter'
-import { PersonForm } from './components/PersonForm'
-import { Persons } from './components/Persons'
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
+import Notification from './components/Notification'
 
 const App = () => {
   const initialValues = {
     name: '',
     number: ''
   }
+
   const [persons, setPersons] = useState([])
-  const [state, setState] = useState(initialValues)
+  const [values, setValues] = useState(initialValues)
   const [filter, setFilter] = useState('')
+  const [message, setMessage] = useState(null)
 
   useEffect(() => {
     personService
@@ -27,8 +30,8 @@ const App = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setState({
-      ...state,
+    setValues({
+      ...values,
       [name]: value
     })
   }
@@ -44,17 +47,17 @@ const App = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     const newPerson = {
-      name: state.name,
-      number: state.number
+      name: values.name,
+      number: values.number
     }
-    const nameExist = persons.find(person => person.name === state.name)
+    const nameExist = persons.find(person => person.name === values.name)
 
     if (nameExist) {
-      const message = `${state.name} is already added to phonebook, replace the old number with a new one?`
+      const message = `${values.name} is already added to phonebook, replace the old number with a new one?`
       const result = handleMessage(message)
 
       if (result) {
-        const previousPerson = persons.find(n => n.name === state.name);
+        const previousPerson = persons.find(n => n.name === values.name);
 
         personService
           .update(previousPerson.id, newPerson)
@@ -62,8 +65,17 @@ const App = () => {
             setPersons(persons.map(person =>
               person.id !== previousPerson.id ?  person : returnedPerson
             ))
+
+            setMessage({
+              content: `Updated ${values.name}`,
+              type: 'success'
+            })
           }).catch(error => {
             console.log('error trying to update user', error)
+            setMessage({
+              content: `Information of ${values.name} has already been removed from server`,
+              type: 'error'
+            })
           })
       }
     } else {
@@ -75,6 +87,11 @@ const App = () => {
             ...persons,
             returnedPerson
           ])
+
+          setMessage({
+            content: `Added ${values.name}`,
+            type: 'success'
+          })
         }).catch(error => {
           console.log('error trying to create user', error)
         })
@@ -98,11 +115,14 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+
+      <Notification message={message} />
+
       <Filter filter={filter} onChange={(e) => setFilter(e.target.value)} />
 
       <h2>Add a new</h2>
       <PersonForm
-        state={state}
+        values={values}
         handleChange={handleChange}
         handleSubmit={handleSubmit}
       />
