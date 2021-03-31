@@ -3,15 +3,18 @@ import axios from 'axios'
 
 export const Country = ({ country }) => {
   const [weather, setWeather] = useState([])
+  const [loading, setLoading] = useState(false)
 
   const api_key = process.env.REACT_APP_API_KEY
   
-  console.log('weather', weather)
-
   useEffect(() => {
+    setLoading(true)
     axios
       .get(`http://api.weatherstack.com/current?access_key=${api_key}&query=${country.capital}`)
-      .then(response => setWeather(response.data))
+      .then(response => {
+        setWeather(response.data)
+        setLoading(false)
+      })
   }, [api_key, country.capital])
 
   return (
@@ -26,6 +29,9 @@ export const Country = ({ country }) => {
         )}
       </ul>
       <img src={country.flag} alt={country.name} style={{ height: '100px' }} />
+
+      {loading ? (<p>Loading...</p>) : ''}
+
       {weather.current && (
         <>
           <h2>Weather in {country.capital}</h2>

@@ -4,7 +4,7 @@ import { Country } from './Country'
 export const Countries = ({ countries, onClick }) => {
 
   const result = () => {
-    if (countries.length > 0 && countries.length > 10) {
+    if (countries.length > 10) {
       return <p>Too many matches, specify another filter</p>
     } else if (countries.length > 1 && countries.length <= 10) {
       return (

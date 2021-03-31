@@ -1,7 +1,12 @@
 import React from 'react'
 
-export const Persons = ({ persons }) => (
-    persons.map(person =>
-      <p key={person.name}>{person.name}: {person.number}</p>
-    )
+export const Persons = ({ persons, handleDelete }) => (
+  <ul>
+    {persons.map(person =>
+      <li key={person.id}>
+        {person.name}: {person.number}
+        <button onClick={() => handleDelete(person.id, person.name)}>delete</button>
+      </li>
+    )}
+  </ul>
 )
