@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "nodemon index.js",
     "lint": "eslint .",
+    "build:prod": "rm -rf build && cd ../../part2/phonebook && npm run build -- prod && cp -r build ../../part3/phonebook-backend",
+    "deploy": "git push heroku main",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
