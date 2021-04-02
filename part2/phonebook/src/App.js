@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 
-import personService from './services/persons'
+import contactService from './services/contacts'
 
 import Filter from './components/Filter'
-import PersonForm from './components/PersonForm'
-import Persons from './components/Persons'
+import ContactForm from './components/ContactForm'
+import Contacts from './components/Contacts'
 import Notification from './components/Notification'
 
 const App = () => {
@@ -13,16 +13,16 @@ const App = () => {
     number: ''
   }
 
-  const [persons, setPersons] = useState([])
+  const [contacts, setContacts] = useState([])
   const [values, setValues] = useState(initialValues)
   const [filter, setFilter] = useState('')
   const [message, setMessage] = useState(null)
 
   useEffect(() => {
-    personService
+    contactService
       .getAll()
-      .then(personsList => {
-        setPersons(personsList)
+      .then(contactsList => {
+        setContacts(contactsList)
       }).catch(error => {
         console.log('error trying to get users', error)
       })
@@ -36,8 +36,8 @@ const App = () => {
     })
   }
 
-  const personsToShow = persons.filter(person =>
-    person.name.toLowerCase().indexOf(filter.toLowerCase()) > -1
+  const contactsToShow = contacts.filter(contact =>
+    contact.name.toLowerCase().indexOf(filter.toLowerCase()) > -1
   );
 
   const handleMessage = (message) => {
@@ -46,24 +46,24 @@ const App = () => {
   
   const handleSubmit = (e) => {
     e.preventDefault()
-    const newPerson = {
+    const newContact = {
       name: values.name,
       number: values.number
     }
-    const nameExist = persons.find(person => person.name === values.name)
+    const nameExist = contacts.find(contact => contact.name === values.name)
 
     if (nameExist) {
       const message = `${values.name} is already added to phonebook, replace the old number with a new one?`
       const result = handleMessage(message)
 
       if (result) {
-        const previousPerson = persons.find(n => n.name === values.name);
+        const previousContact = contacts.find(n => n.name === values.name);
 
-        personService
-          .update(previousPerson.id, newPerson)
-          .then(returnedPerson => {
-            setPersons(persons.map(person =>
-              person.id !== previousPerson.id ?  person : returnedPerson
+        contactService
+          .update(previousContact.id, newContact)
+          .then(returnedContact => {
+            setContacts(contacts.map(contact =>
+              contact.id !== previousContact.id ?  contact : returnedContact
             ))
 
             setMessage({
@@ -80,12 +80,12 @@ const App = () => {
       }
     } else {
 
-      personService
-        .create(newPerson)
-        .then(returnedPerson => {
-          setPersons([
-            ...persons,
-            returnedPerson
+      contactService
+        .create(newContact)
+        .then(returnedContact => {
+          setContacts([
+            ...contacts,
+            returnedContact
           ])
 
           setMessage({
@@ -104,10 +104,10 @@ const App = () => {
     const result = handleMessage(message)
 
     if (result) {
-      personService
+      contactService
         .remove(id)
-        .then(returnedPerson => {
-          setPersons(persons.filter(person => person.id !== id))
+        .then(returnedContact => {
+          setContacts(contacts.filter(contact => contact.id !== id))
         })
     }
   }
@@ -121,15 +121,15 @@ const App = () => {
       <Filter filter={filter} onChange={(e) => setFilter(e.target.value)} />
 
       <h2>Add a new</h2>
-      <PersonForm
+      <ContactForm
         values={values}
         handleChange={handleChange}
         handleSubmit={handleSubmit}
       />
 
       <h2>Numbers</h2>
-      <Persons
-        persons={personsToShow}
+      <Contacts
+        contacts={contactsToShow}
         handleDelete={(id, name) => handleDelete(id, name)}
       />
     </div>

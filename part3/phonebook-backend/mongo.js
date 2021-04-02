@@ -12,32 +12,32 @@ const name = process.argv[3]
 const number = process.argv[4]
 
 const url =
-  `mongodb+srv://phonebook_usr:${password}@cluster0.d4oax.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
+  `mongodb+srv://phonebook_usr:${password}@cluster0.d4oax.mongodb.net/phonebook?retryWrites=true&w=majority`
 
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
 
-const personSchema = new mongoose.Schema({
+const contactSchema = new mongoose.Schema({
   name: String,
   number: String
 })
 
-const Person = mongoose.model('Person', personSchema)
+const Contact = mongoose.model('Contact', contactSchema)
 
-const person = new Person({
+const contact = new Contact({
   name: name,
   number: number
 })
 
 if (process.argv.length < 4) {
-  Person.find({}).then(result => {
+  Contact.find({}).then(result => {
     console.log('Phonebook:')
-    result.forEach(person => {
-      console.log(`${person.name} ${person.number}`)
+    result.forEach(contact => {
+      console.log(`${contact.name} ${contact.number}`)
     })
     mongoose.connection.close()
   })
 } else {
-  person.save().then(result => {
+  contact.save().then(result => {
     console.log(`added ${name} number ${number} to phonebook`)
     mongoose.connection.close()
   })

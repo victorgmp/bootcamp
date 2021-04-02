@@ -1,6 +1,11 @@
+require('dotenv').config()
+require('./db')
+
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+
+const Contact = require('./models/Contact')
 
 const app = express()
 
@@ -13,35 +18,23 @@ app.use(express.static('build'))
 morgan.token('body', (req, res) => JSON.stringify(req.body))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body - :req[content-length]'))
 
-let persons = [
-  {
-    name: 'Arto Hellas',
-    number: '040-123456',
-    id: 1
-  },
-  {
-    name: 'Ada Lovelace',
-    number: '39-44-5323523',
-    id: 2
-  },
-  {
-    name: 'Dan Abramov',
-    number: '12-43-234345',
-    id: 3
-  },
-  {
-    name: 'Mary Poppendieck',
-    number: '39-23-6423122',
-    id: 4
-  }
-]
+let contacts = []
 
+const generateId = () => {
+  const maxId = contacts.length > 0
+    ? Math.max(...contacts.map(n => n.id))
+    : 0
+  return maxId + 1
+}
+
+// root
 app.get('/', (req, res) => {
   res.send('<h1>Hello Wolrd!</h1>')
 })
 
+// info
 app.get('/info', (req, res) => {
-  const personsCount = persons.length
+  const personsCount = contacts.length
   const message = `
     <p>Phonebook has info for ${personsCount} people</p>
     <p>${new Date()}</p>
@@ -49,36 +42,35 @@ app.get('/info', (req, res) => {
   res.send(message)
 })
 
-app.get('/api/persons', (req, res) => {
-  res.json(persons)
+// get all
+app.get('/api/contacts', (req, res) => {
+  Contact.find({}).then(contacts => {
+    res.json(contacts)
+  })
 })
 
-app.get('/api/persons/:id', (req, res) => {
+// get by id
+app.get('/api/contacts/:id', (req, res) => {
   const id = Number(req.params.id)
-  const person = persons.find(person => person.id === id)
+  const contact = contacts.find(contact => contact.id === id)
 
-  if (person) {
-    res.json(person)
+  if (contact) {
+    res.json(contact)
   } else {
-    res.status(404).send('Person not found')
+    res.status(404).send('Contact not found')
   }
 })
 
-app.delete('/api/persons/:id', (req, res) => {
+// delete by id
+app.delete('/api/contacts/:id', (req, res) => {
   const id = Number(req.params.id)
-  persons = persons.filter(person => person.id !== id)
+  contacts = contacts.filter(contact => contact.id !== id)
 
   res.status(204).end()
 })
 
-const generateId = () => {
-  const maxId = persons.length > 0
-    ? Math.max(...persons.map(n => n.id))
-    : 0
-  return maxId + 1
-}
-
-app.post('/api/persons', (req, res) => {
+// add
+app.post('/api/contacts', (req, res) => {
   const { body } = req
 
   if (!body.name || !body.number) {
@@ -87,9 +79,8 @@ app.post('/api/persons', (req, res) => {
     })
   }
 
-  const personFound = persons.find(person => person.name === body.name)
-
-  if (personFound) {
+  const contactsFound = contacts.find(contact => contact.name === body.name)
+  if (contactsFound) {
     return res.status(400).json({
       error: 'name must be unique'
     })
@@ -100,8 +91,7 @@ app.post('/api/persons', (req, res) => {
     number: body.number,
     id: generateId()
   }
-
-  persons = [...persons, newPerson]
+  contacts = [...contacts, newPerson]
 
   res.json(newPerson)
 })

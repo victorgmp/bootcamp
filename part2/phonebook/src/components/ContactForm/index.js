@@ -1,6 +1,6 @@
 import React from 'react'
 
-const PersonForm = ({ values, handleChange, handleSubmit }) => (
+const ContactForm = ({ values, handleChange, handleSubmit }) => (
   <form onSubmit={handleSubmit}>
     <div>
       name: <input name="name" value={values.name} onChange={handleChange} />
@@ -14,4 +14,4 @@ const PersonForm = ({ values, handleChange, handleSubmit }) => (
   </form>
 )
 
-export default PersonForm
+export default ContactForm
