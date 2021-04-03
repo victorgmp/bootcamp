@@ -93,7 +93,11 @@ const App = () => {
             type: 'success'
           })
         }).catch(error => {
-          console.log('error trying to create user', error)
+          console.log('error trying to create user', error.response.data)
+          setMessage({
+            content: error.response.data.error,
+            type: 'error'
+          })
         })
     }
   }
@@ -106,7 +110,7 @@ const App = () => {
     if (result) {
       contactService
         .remove(id)
-        .then(returnedContact => {
+        .then(() => {
           setContacts(contacts.filter(contact => contact.id !== id))
         })
     }
