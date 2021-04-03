@@ -1,11 +1,13 @@
 require('dotenv').config()
 require('./db')
 
+const cors = require('cors')
 const express = require('express')
 const morgan = require('morgan')
-const cors = require('cors')
 
 const Contact = require('./models/Contact')
+const handleErrors = require('./middlewares/handleErrors')
+const notFound = require('./middlewares/notFound')
 
 const app = express()
 
@@ -18,14 +20,7 @@ app.use(express.static('build'))
 morgan.token('body', (req, res) => JSON.stringify(req.body))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body - :req[content-length]'))
 
-let contacts = []
-
-const generateId = () => {
-  const maxId = contacts.length > 0
-    ? Math.max(...contacts.map(n => n.id))
-    : 0
-  return maxId + 1
-}
+const contacts = []
 
 // root
 app.get('/', (req, res) => {
@@ -34,9 +29,9 @@ app.get('/', (req, res) => {
 
 // info
 app.get('/info', (req, res) => {
-  const personsCount = contacts.length
+  const ContactsCount = contacts.length
   const message = `
-    <p>Phonebook has info for ${personsCount} people</p>
+    <p>Phonebook has info for ${ContactsCount} people</p>
     <p>${new Date()}</p>
   `
   res.send(message)
@@ -50,51 +45,67 @@ app.get('/api/contacts', (req, res) => {
 })
 
 // get by id
-app.get('/api/contacts/:id', (req, res) => {
-  const id = Number(req.params.id)
-  const contact = contacts.find(contact => contact.id === id)
-
-  if (contact) {
-    res.json(contact)
-  } else {
-    res.status(404).send('Contact not found')
-  }
+app.get('/api/contacts/:id', (req, res, next) => {
+  const id = req.params.id
+  Contact.findById(id)
+    .then(contact => {
+      if (contact) {
+        res.json(contact)
+      } else {
+        res.status(404).end()
+      }
+    })
+    .catch(error => next(error))
 })
 
 // delete by id
-app.delete('/api/contacts/:id', (req, res) => {
-  const id = Number(req.params.id)
-  contacts = contacts.filter(contact => contact.id !== id)
+app.delete('/api/contacts/:id', (req, res, next) => {
+  const { id } = req.params
 
-  res.status(204).end()
+  Contact.findByIdAndRemove(id)
+    .then(() => {
+      res.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
 // add
-app.post('/api/contacts', (req, res) => {
+app.post('/api/contacts', (req, res, next) => {
   const { body } = req
 
-  if (!body.name || !body.number) {
-    return res.status(400).json({
-      error: 'missing name or phone number'
-    })
-  }
-
-  const contactsFound = contacts.find(contact => contact.name === body.name)
-  if (contactsFound) {
-    return res.status(400).json({
-      error: 'name must be unique'
-    })
-  }
-
-  const newPerson = {
+  const contact = new Contact({
     name: body.name,
-    number: body.number,
-    id: generateId()
-  }
-  contacts = [...contacts, newPerson]
+    number: body.number
+  })
 
-  res.json(newPerson)
+  contact
+    .save()
+    .then(savedContact => savedContact.toJSON())
+    .then(savedAndFormattedContact => {
+      res.json(savedAndFormattedContact)
+    })
+    .catch(error => next(error))
 })
+
+// update by id
+app.put('/api/contacts/:id', (req, res, next) => {
+  const { body } = req
+  const { id } = req.params
+
+  const contact = {
+    name: body.name,
+    number: body.number
+  }
+
+  Contact.findByIdAndUpdate(id, contact, { new: true })
+    .then(updatedContact => {
+      res.json(updatedContact)
+    })
+    .catch(error => next(error))
+})
+
+app.use(notFound)
+app.use(handleErrors)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {

@@ -9,8 +9,8 @@ mongoose.connect(connectionString, {
   useCreateIndex: true
 })
   .then(() => {
-    console.log('Database connected')
+    console.log('database connected')
   })
   .catch((error) => {
-    console.log(error)
+    console.log('error connecting to database:', error.message)
   })
