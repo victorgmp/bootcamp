@@ -1,7 +1,6 @@
-PUT http://localhost:3001/api/contacts/606735cb4fdd7b735266420d
+PUT http://localhost:3003/api/blogs/606f19d4a20309eb2a8e245e
 Content-Type: application/json
 
 {
-  "name": "Víctor Moreno",
-  "number": "058-12345678"
+  "likes": 9
 }

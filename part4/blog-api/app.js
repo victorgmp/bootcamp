@@ -1,6 +1,7 @@
 const config = require('./utils/config')
 const cors = require('cors')
 const express = require('express')
+require('express-async-errors')
 const morgan = require('morgan')
 
 const logger = require('./utils/logger')
@@ -15,7 +16,7 @@ require('./utils/db')
 app.use(cors())
 app.use(express.json())
 app.use(morgan('tiny'))
-app.use(requestLogger)
+// app.use(requestLogger)
 
 app.use('/api/blogs', blogsRouter)
 

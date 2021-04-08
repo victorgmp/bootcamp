@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
 const logger = require('./logger')
+const config = require('./config')
 
-const connectionString = process.env.MONGODB_URI
+const connectionString = config.MONGODB_URI
 
 mongoose.connect(connectionString, {
   useNewUrlParser: true,
