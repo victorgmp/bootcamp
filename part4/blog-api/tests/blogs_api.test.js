@@ -1,17 +1,51 @@
 const mongoose = require('mongoose')
-const supertest = require('supertest')
-const app = require('../app')
-const { initialBlogs, blogsInDb } = require('./test_helper')
-const Blog = require('../models/Blog')
+const bcrypt = require('bcrypt')
 
-const api = supertest(app)
+const {
+  api,
+  initialBlogs,
+  blogsInDb,
+  initialUsers,
+  usersInDb,
+  testLogin
+} = require('./test_helper')
+const Blog = require('../models/Blog')
+const User = require('../models/User')
+
+jest.setTimeout(30000)
 
 beforeEach(async () => {
+  await User.deleteMany({})
+
+  let users = []
+  for (let user of initialUsers) {
+    const saltRounds = 10
+    const passwordHash = await bcrypt.hash(user.password, saltRounds)
+
+    const userObject = new User({
+      username: user.username,
+      name: user.name,
+      passwordHash
+    })
+    const savedUser = await userObject.save()
+    // users = users.concat(savedUser)
+    users = [ ...users, savedUser ]
+  }
+
   await Blog.deleteMany({})
 
+  let index = 0
   for (let blog of initialBlogs) {
+    const user = users[index]
+
     const blogObject = new Blog(blog)
-    await blogObject.save()
+    blogObject.user = user.id
+
+    const savedBlog = await blogObject.save()
+
+    user.blogs = [ ...user.blogs, savedBlog._id ]
+    await user.save()
+    index ++
   }
 })
 
@@ -37,7 +71,7 @@ describe('get blogs', () => {
 })
 
 describe('post blogs', () => {
-  test('add new blog', async () => {
+  test('succeeds with valid data', async () => {
     const newBlog =   {
       title: 'blog four',
       author: 'author four',
@@ -45,28 +79,40 @@ describe('post blogs', () => {
       likes: '8'
     }
 
+    const token = await testLogin({
+      username: initialUsers[0].username,
+      password: initialUsers[0].password,
+    })
+
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
-    const response = await blogsInDb()
-    const titles = response.map(r => r.title)
+    const blogsAtEnd = await blogsInDb()
+    const titles = blogsAtEnd.map(r => r.title)
 
-    expect(response).toHaveLength(initialBlogs.length + 1)
+    expect(blogsAtEnd).toHaveLength(initialBlogs.length + 1)
     expect(titles).toContain('blog four')
   })
 
-  test('likes by default zero', async () => {
+  test('with likes by default zero', async () => {
     const newBlog =   {
       title: 'blog five',
       author: 'author five',
       url: '/api/blogs/5'
     }
 
+    const token = await testLogin({
+      username: initialUsers[0].username,
+      password: initialUsers[0].password,
+    })
+
     const { body }  = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -74,19 +120,43 @@ describe('post blogs', () => {
     expect(body.likes).toBe(0)
   })
 
-  test('blogs without title and url', async () => {
+  test('without title and url', async () => {
     const newBlog =   {
       author: 'author six',
       likes: '6'
     }
 
+    const token = await testLogin({
+      username: initialUsers[0].username,
+      password: initialUsers[0].password,
+    })
+
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(400)
 
     const response = await blogsInDb()
     expect(response).toHaveLength(initialBlogs.length)
+  })
+
+  test('without token', async () => {
+    const newBlog =   {
+      title: 'blog seven',
+      author: 'author seven',
+      url: '/api/blogs/7',
+      likes: '8'
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+
+    const blogsAtEnd = await blogsInDb()
+
+    expect(blogsAtEnd).toHaveLength(initialBlogs.length)
   })
 })
 
@@ -95,8 +165,14 @@ describe('delete blogs', () => {
     const blogsAtStart = await blogsInDb()
     const blogToDelete = blogsAtStart[0]
 
+    const token = await testLogin({
+      username: initialUsers[0].username,
+      password: initialUsers[0].password,
+    })
+
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${token}`)
       .expect(204)
 
     const blogsAtEnd = await blogsInDb()
@@ -107,9 +183,15 @@ describe('delete blogs', () => {
   })
 
   test('delete an non-existent blog', async () => {
+    const token = await testLogin({
+      username: initialUsers[0].username,
+      password: initialUsers[0].password,
+    })
+
     await api
       .delete('/api/blogs/606f19d4a20309eb2a8e246c')
-      .expect(204)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(401)
 
     const blogsAtEnd = await blogsInDb()
     expect(blogsAtEnd).toHaveLength(initialBlogs.length)
@@ -132,7 +214,6 @@ describe('update blogs', () => {
     expect(body.likes).toBe(blog.likes)
   })
 })
-
 
 afterAll(() => {
   mongoose.connection.close()

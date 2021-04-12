@@ -12,7 +12,11 @@ const blogSchema = new Schema({
     minlength: 8,
     required: true
   },
-  likes: Number
+  likes: Number,
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }
 })
 
 blogSchema.set('toJSON', {
