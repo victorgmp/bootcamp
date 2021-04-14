@@ -139,8 +139,8 @@ const App = () => {
           content: `Deleted ${title}`,
           type: 'success'
         })
-      }      
-      
+      }
+
     } catch (error) {
       console.log('error trying to update user', error)
       setMessage({
