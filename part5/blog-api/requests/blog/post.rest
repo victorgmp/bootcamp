@@ -1,0 +1,10 @@
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpY3RvcmdtcCIsImlkIjoiNjA3MzgxMjUyYjg0Mjk0MjNhNTQwZDQ3IiwiaWF0IjoxNjE4MTg1NTAzfQ.W52JV2Bc1lJdBvmuU1G7dJeZTvN6W4QuvVE8hMX_or4
+
+{
+  "title": "blog de cocina2",
+  "author": "test 2",
+  "url": "/test/blog/2",
+  "likes": 8
+}
