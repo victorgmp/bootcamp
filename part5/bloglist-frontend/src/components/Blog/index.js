@@ -36,7 +36,7 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
   }
 
   return (
-    <div style={blogStyle}>
+    <div style={blogStyle} className='blog'>
       {blog.title} - {blog.author} {' '}
       <button onClick={toggleDetails}>view</button> <br />
       {showDetails && (
