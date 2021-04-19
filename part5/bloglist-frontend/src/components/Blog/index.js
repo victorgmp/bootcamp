@@ -36,14 +36,19 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
   }
 
   return (
-    <div style={blogStyle} className='blog'>
+    <div blog-test-id="blog" style={blogStyle} className='blog'>
       {blog.title} - {blog.author} {' '}
-      <button onClick={toggleDetails}>view</button> <br />
+      <button onClick={toggleDetails}>view</button> <br/>
       {showDetails && (
         <>
-          {blog.url} <br />
-          likes {blog.likes} {' '}
-          <button onClick={toggleLikes}>like</button> <br />
+          <span>{blog.url}</span><br/>
+          {/* {blog.url} <br /> */}
+          {/* likes {blog.likes} {' '} */}
+          <span>likes</span> {' '}
+          <span id="likes" likes-test-id="likes">
+            {blog.likes}
+          </span>{' '}
+          <button id="like-button" onClick={toggleLikes}>like</button> <br/>
           <button onClick={handleRemove}>remove</button>
         </>
       )}

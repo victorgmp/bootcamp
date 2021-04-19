@@ -142,7 +142,7 @@ const App = () => {
       }
 
     } catch (error) {
-      console.log('error trying to update user', error)
+      console.log('error trying to delete blog', error)
       setMessage({
         content: `error trying to delete blog: ${title} `,
         type: 'error'
