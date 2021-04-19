@@ -131,6 +131,10 @@ describe('Blog app', function() {
       cy.get('[blog-test-id="blog"]').then(($blog) => {
         expect($blog).to.have.length(3)
       })
+      cy.contains('blog create by cypress test')
+      cy.contains('view').click()
+      cy.get('#like-button').click()
+      cy.contains('likes 14')
     })
   })
 })
