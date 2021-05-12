@@ -6,12 +6,12 @@ const userSchema = new Schema({
     type: String,
     required: true,
     unique: true,
-    minlength: 3,
+    minlength: 3
   },
   favoriteGenre: {
     type: String,
-    required: true,
-  },
+    required: true
+  }
 })
 
 userSchema.plugin(uniqueValidator)
@@ -29,4 +29,3 @@ userSchema.plugin(uniqueValidator)
 const User = model('User', userSchema)
 
 module.exports = User
-

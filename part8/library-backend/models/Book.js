@@ -1,4 +1,4 @@
-const { Schema, model, SchemaTypes } = require('mongoose')
+const { Schema, model } = require('mongoose')
 
 const bookSchema = new Schema({
   title: {
@@ -8,7 +8,7 @@ const bookSchema = new Schema({
     minlength: 2
   },
   published: {
-    type: Number,
+    type: Number
   },
   author: {
     type: Schema.Types.ObjectId,

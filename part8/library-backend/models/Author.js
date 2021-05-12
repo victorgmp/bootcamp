@@ -8,8 +8,8 @@ const authorSchema = new Schema({
     minlength: 4
   },
   born: {
-    type: Number,
-  },
+    type: Number
+  }
   // books: [{
   //   type: Schema.Types.ObjectId,
   //   ref: 'Book'

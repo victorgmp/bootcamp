@@ -51,7 +51,7 @@ const EditAuthor = ({ authors, notify }) => {
             value={born}
             onChange={(e) => setBorn(e.target.value)}
           />      </div>
-        <button type="submit">update actor</button>
+        <button type="submit">update author</button>
       </form>
     </div>
   )
